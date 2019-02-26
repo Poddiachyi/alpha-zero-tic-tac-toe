@@ -1,69 +1,4 @@
-from random_agent import RandomAgent
-
-class Board:
-
-    def __init__(self):
-        """__init_ method"""
-        self.x = "-"
-        self.y = "|"
-        self.z = "  "
-        self.zz = ""
-        self.board = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]    # the list for the board items (0-8)
-
-    def draw_env(self):
-        """Draws the board without square numbers then draws the board with square numbers"""
-        print('The Board looks like this: \n')                              # draw the board without any square numbers
-        print(self.z * 16, self.z, self.y, self.z, self.y, self.z, self.y, self.z)
-        print(self.z * 16, self.x * 17)
-        print(self.z * 16, self.z, self.y, self.z, self.y, self.z, self.y, self.z)
-        print(self.z * 16, self.x * 17)
-        print(self.z * 16, self.z, self.y, self.z, self.y, self.z, self.y, self.z)
-        print(self.z * 16, self.x * 17)
-        print(self.z * 16, self.z, self.y, self.z, self.y, self.z, self.y, self.z)
-        print()
-        print('The Board with the square numbers looks like this: \n')      # draw the borad with the square numbers
-        print(self.z * 16, 1, self.zz, self.y, 2, self.zz, self.y, 3, self.zz, self.y, 4)
-        print(self.z * 16, self.x * 17)
-        print(self.z * 16, 5, self.zz, self.y, 6, self.zz, self.y, 7, self.zz, self.y, 8)
-        print(self.z * 16, self.x * 17)
-        print(self.z * 16, 9, self.zz, self.y, 10, self.y, 11, self.y, 12)
-        print(self.z * 16, self.x * 17)
-        print(self.z * 16, 13, self.y, 14, self.y, 15, self.y, 16)
-        print()
-
-class Mark(Board):
-
-    def draw(self, square_number, mark):
-        """Draws the borad with current values"""
-        self.square_number = square_number
-        self.mark = mark                            # mark is either "X" or "O"
-        self.board[self.square_number] = self.mark  # set the position in list board to either "X" or "O"
-
-        for i in range(16):                         # loop thru the values in list board
-            try:
-                self.board[i] += 1                  # checks if the value in list board is an integer,
-                self.board[i] = " "                 # if it is, set it equal to a space (" ")
-            except TypeError:                       # if the value is an "X" or an "O", just pass
-                pass
-
-        # print()
-        # # print the first row of the board, with current values
-        # print(self.z * 16, self.board[0], self.y, self.board[1], self.y, self.board[2], self.y, self.board[3])
-        # print(self.z * 16, self.x * 14)
-        #
-        # # print the second row of the board, with current values
-        # print(self.z * 16, self.board[4], self.y, self.board[5], self.y, self.board[6], self.y, self.board[7])
-        # print(self.z * 16, self.x * 14)
-        #
-        # # print the third row of the board, with the current values
-        # print(self.z * 16, self.board[8], self.y, self.board[9], self.y, self.board[10], self.y, self.board[11])
-        # print(self.z * 16, self.x * 14)
-        #
-        # # print the fourth row of the board with the current values
-        # print(self.z * 16, self.board[12], self.y, self.board[13], self.y, self.board[14], self.y, self.board[15])
-        # print()
-
-class Play(Mark):
+class Play(object):
 
     def __init__(self, agent):
         super().__init__()
@@ -82,9 +17,8 @@ class Play(Mark):
                 if not self.switch:                     # checks to see if the while loop switch has been set to False
                     break                               # if it has, break out of the while loop - end game
                 else:
-                    self.counter += 1                   
+                    self.counter += 1
                 if self.counter == 16:                  # if 16 moves have been made with no winner
-                    # print("The game is a Tie - no winner.")
                     self.switch = False                 # set while loop switch to False
                     self.winner = 'Draw'
                     break

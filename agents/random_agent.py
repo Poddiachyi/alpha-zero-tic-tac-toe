@@ -12,10 +12,7 @@ class RandomAgent(object):
         return action_dist.argmax()
 
     def get_action_mask(self, state):
-        mask = np.ones(16)
-        for i in range(len(state)):
-            if state[i] == "X" and state[i] == "O":
-                mask[i] = 0
+        mask = np.array([0. if val == 'X' or val == 'O' else 1. for val in state])
         return mask
 
     def apply_mask(self, action_dist, mask):
