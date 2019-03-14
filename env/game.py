@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 
 class Game(object):
 
@@ -21,6 +22,13 @@ class Game(object):
         self.current_player = 1
         self.winner = 0
         return self.board, self.current_player
+
+    def clone(self):
+        game = Game()
+        game.board = deepcopy(self.board)
+        game.current_player = self.current_player
+        game.winner = self.winner
+        return game
 
 
     def _is_done(self):

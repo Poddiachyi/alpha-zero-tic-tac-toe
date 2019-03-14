@@ -7,16 +7,15 @@ def main():
     pieces = {1: 'X', 0: 'Draw', -1: 'O'}
     stats = {1: 0, 0: 0, -1: 0}
 
-    for i in range(3):
+    for i in range(100):
         print('Game {} begins'.format(i))
         env = Game()
         players = [RandomAgent(), None, RandomAgent()] # O, none, X
         state, current_player = env.reset()
-        env.render()
         while True:
+            # env.render()
             action = players[current_player + 1].act(state, env.get_valid_moves())
             state, current_player, done = env.step(action)
-            env.render()
             if done:
                 stats[env.winner] += 1
                 break
