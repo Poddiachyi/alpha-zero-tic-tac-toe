@@ -65,7 +65,7 @@ class MCTS(object):
                 node = node.select()
                 game.step(node.action)
 
-            p, v = self.net(game.board)
+            p, v = self.net(game.get_canonical_board())
 
             valid_moves = game.get_valid_moves()
             p = p * valid_moves
