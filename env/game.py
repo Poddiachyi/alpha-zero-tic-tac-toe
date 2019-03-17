@@ -18,7 +18,6 @@ class Game(object):
         canonical_board = np.array(self.board).reshape((self.board_size, self.board_size))
         return canonical_board
 
-
     def step(self, action):
         self.board[action] = self.current_player
         done = self._is_done()
@@ -38,6 +37,9 @@ class Game(object):
         game.current_player = self.current_player
         game.winner = self.winner
         return game
+
+
+    # how many must be in a line in order to win?
 
     def _is_done(self):
         value = self.current_player

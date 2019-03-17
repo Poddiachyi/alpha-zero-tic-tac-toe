@@ -5,7 +5,10 @@
 - [x] Add random policy agent
 - [x] Finish the environment
 - [x] Add MCTS
-- [ ] Add NN
+- [x] Add NN
+- [X] Add NN Wrapper
+- [ ] Add Arena for models
+- [ ] Add Train - class for training models
 - [ ] Finish AlphaZero
 - [ ] Refactor
 - [ ] Enhance README

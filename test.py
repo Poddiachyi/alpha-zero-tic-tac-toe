@@ -7,7 +7,7 @@ def main():
     pieces = {1: 'X', 0: 'Draw', -1: 'O'}
     stats = {1: 0, 0: 0, -1: 0}
 
-    for i in range(100):
+    for i in range(1):
         print('Game {} begins'.format(i))
         env = Game(board_size=4)
         players = [RandomAgent(env.get_action_size()), None, RandomAgent(env.get_action_size())] # O, none, X

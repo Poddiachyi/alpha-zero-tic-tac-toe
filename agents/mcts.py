@@ -29,16 +29,16 @@ class Node(object):
                 idx_max = idx
         return self.children[idx_max]
 
-    def expand(self, game, p):
+    def expand(self, game, pi):
         # p is a probability vector for each move in a state
-        self.child_psas = deepcopy(p)
+        self.child_psas = deepcopy(pi)
         valid_moves = game.get_valid_moves()
         for i in valid_moves:
             if valid_moves[i]:
-                self.add_child(parent=self, action=i, p=p[i])
+                self.add_child(parent=self, action=i, pi=pi[i])
 
-    def add_child(self, parent, action, p=0.):
-        node = Node(parent, action, p)
+    def add_child(self, parent, action, pi=0.):
+        node = Node(parent, action, pi)
         self.children.append(node)
 
     def backprop(self, wsa, v):  # do i really need to pass wsa here?
@@ -65,16 +65,16 @@ class MCTS(object):
                 node = node.select()
                 game.step(node.action)
 
-            p, v = self.net(game.get_canonical_board())
+            pi, v = self.net(game.get_canonical_board())
 
             valid_moves = game.get_valid_moves()
-            p = p * valid_moves
+            pi = p * valid_moves
 
-            p_sum = p.sum()
-            if p_sum > 0:
-                p /= p_sum
+            pi_sum = pi.sum()
+            if pi_sum > 0:
+                pi /= pi_sum
 
-            node.expand(game, p)
+            node.expand(game, pi)
 
             wsa = game.winner
 
