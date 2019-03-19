@@ -41,9 +41,9 @@ class Node(object):
         node = Node(parent, action, pi)
         self.children.append(node)
 
-    def backprop(self, wsa, v):  # do i really need to pass wsa here?
+    def backprop(self, wsa, v):
         self.Nsa += 1
-        self.Wsa = wsa + v       # it probably must be self.Wsa += v
+        self.Wsa += v
         self.Qsa = self.Wsa / self.Nsa
 
 class MCTS(object):
@@ -55,34 +55,34 @@ class MCTS(object):
 
     def search(self, game, node, temperature=1, n_sims=10):
         self.root = node
-        self.game = game   # don't loke naming. game and self.game
+        self.game = game
 
         for i in range(n_sims):
-            node = self.root
-            game = self.game.clone()
+            node_temp = self.root
+            game_temp = self.game.clone()
 
             while node.is_not_leaf():
-                node = node.select()
-                game.step(node.action)
+                node_temp = node.select()
+                game_temp.step(node.action)
 
-            pi, v = self.net(game.get_canonical_board())
+            pi, v = self.net.predict(game_temp.get_canonical_board())
 
-            valid_moves = game.get_valid_moves()
-            pi = p * valid_moves
+            valid_moves = game_temp.get_valid_moves()
+            pi = pi * valid_moves
 
             pi_sum = pi.sum()
             if pi_sum > 0:
                 pi /= pi_sum
 
-            node.expand(game, pi)
+            node_temp.expand(game_temp, pi)
 
-            wsa = game.winner
+            # wsa = game.winner
 
-            while node is not None:
-                wsa = -wsa
-                v = -v
-                node.back_prop(wsa, v)
-                node = node.parent
+            while node_temp is not None:
+                # wsa = -wsa
+                # v = -v
+                node_temp.backprop(0, v)
+                node_temp = node.parent
 
         u_max = 0
         idx_max = 0

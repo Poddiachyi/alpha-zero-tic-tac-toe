@@ -32,7 +32,7 @@ class Game(object):
         return self.board, self.current_player
 
     def clone(self):
-        game = Game()
+        game = Game(self.board_size)
         game.board = deepcopy(self.board)
         game.current_player = self.current_player
         game.winner = self.winner
@@ -86,15 +86,22 @@ class Game(object):
         z = "  "
         w = ' '
         spaces = 5
+        columns = z * spaces
+        for i in range(self.board_size):
+            columns += 2 * w + str(i) + w
+        print(columns)
         print(z * spaces, x * (self.board_size * 4 - 1))
+        row_number = 0
         for i in range(0, self.size, self.board_size):
             row_print = z * spaces + y + w
             row = [self.pieces[piece] for piece in self.board[i:i + self.board_size]]
             for val in row:
                 row_print += val + w
                 row_print += y + w
+            row_print += str(row_number)
             print(row_print)
-            print(z * spaces, x * (self.board_size * 4 - 1))
+            print(z * spaces , x * (self.board_size * 4))
+            row_number += 1
         print()
 
 

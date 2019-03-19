@@ -7,8 +7,9 @@
 - [x] Add MCTS
 - [x] Add NN
 - [X] Add NN Wrapper
-- [ ] Add Arena for models
-- [ ] Add Train - class for training models
-- [ ] Finish AlphaZero
+- [X] Add Arena for models
+- [X] Add Train - class for training models
+- [X] Finish AlphaZero
+- [ ] Fix bugs
 - [ ] Refactor
 - [ ] Enhance README
