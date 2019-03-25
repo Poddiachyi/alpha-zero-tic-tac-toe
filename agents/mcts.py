@@ -17,7 +17,7 @@ class Node(object):
             return True
         return False
 
-    def select(self, c_puct=2):
+    def select(self, c_puct=1):
         u_max = 0
         idx_max = 0
 
@@ -30,10 +30,10 @@ class Node(object):
         return self.children[idx_max]
 
     def expand(self, game, pi):
-        # p is a probability vector for each move in a state
+        # pi is a probability vector for each move in a state
         self.child_psas = deepcopy(pi)
         valid_moves = game.get_valid_moves()
-        for i in valid_moves:
+        for i in range(len(valid_moves)):
             if valid_moves[i]:
                 self.add_child(parent=self, action=i, pi=pi[i])
 
@@ -41,10 +41,17 @@ class Node(object):
         node = Node(parent, action, pi)
         self.children.append(node)
 
-    def backprop(self, wsa, v):
+    def backprop(self, v):
         self.Nsa += 1
         self.Wsa += v
         self.Qsa = self.Wsa / self.Nsa
+
+    def show(self):
+        print('action', self.action)
+        print('children', self.children)
+        print('child_psas', self.child_psas)
+        print('parent', self.parent)
+        print()
 
 class MCTS(object):
 
@@ -53,7 +60,7 @@ class MCTS(object):
         self.game = None
         self.net = net
 
-    def search(self, game, node, temperature=1, n_sims=10):
+    def search(self, game, node, temperature=1, n_sims=50):
         self.root = node
         self.game = game
 
@@ -61,11 +68,20 @@ class MCTS(object):
             node_temp = self.root
             game_temp = self.game.clone()
 
-            while node.is_not_leaf():
-                node_temp = node.select()
-                game_temp.step(node.action)
+            while node_temp.is_not_leaf():
+                node_temp = node_temp.select()
+                game_temp.step(node_temp.action)
 
             pi, v = self.net.predict(game_temp.get_canonical_board())
+            # game_temp.render()
+            # print(v)
+            # print(pi)
+
+            pi = pi.cpu().numpy()
+
+            if node_temp.parent is None:
+                pi = self.add_dirichlet_noise(game_temp, pi)
+
 
             valid_moves = game_temp.get_valid_moves()
             pi = pi * valid_moves
@@ -76,13 +92,9 @@ class MCTS(object):
 
             node_temp.expand(game_temp, pi)
 
-            # wsa = game.winner
-
             while node_temp is not None:
-                # wsa = -wsa
-                # v = -v
-                node_temp.backprop(0, v)
-                node_temp = node.parent
+                node_temp.backprop(v)
+                node_temp = node_temp.parent
 
         u_max = 0
         idx_max = 0
@@ -91,8 +103,23 @@ class MCTS(object):
         for idx, child in enumerate(self.root.children):
             temperature_exponent = int(1 / temperature)
 
-            if child.Nsa ** temperature_exponent > highest_nsa:
-                highest_nsa = child.Nsa ** temperature_exponent
-                highest_index = idx
+            if child.Nsa ** temperature_exponent > u_max:
+                u_max = child.Nsa ** temperature_exponent
+                idx_max = idx
 
-        return self.root.children[highest_index]
+        return self.root.children[idx_max]
+
+
+    def add_dirichlet_noise(self, game, psa_vector):
+        dirichlet_alpha = 0.5
+        epsilon = 0.25
+        dirichlet_input = [dirichlet_alpha for x in range(game.get_action_size())]
+
+        dirichlet_list = np.random.dirichlet(dirichlet_input)
+        noisy_psa_vector = []
+
+        for idx, psa in enumerate(psa_vector):
+            noisy_psa_vector.append(
+                (1 - epsilon) * psa + epsilon * dirichlet_list[idx])
+
+        return np.array(noisy_psa_vector)

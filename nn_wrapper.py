@@ -1,7 +1,10 @@
 from agents.resnet import ResNet
+from agents.ffn import NeuralNet
 import torch
 import torch.optim as optim
 import os
+
+import numpy as np
 
 
 
@@ -13,13 +16,15 @@ class NNWrapper(object):
 
         self.net.cuda()
 
-    def predict(self, state):
+    def predict(self, board):
+        state = torch.FloatTensor(np.array(board).astype(np.float64)).cuda()
+        state = state.view(-1, 1, 3, 3)
         self.net.eval()
         with torch.no_grad():
             pi, v = self.net(state)
         return pi[0], v[0]
 
-    def train(self, train_set, learning_rate=0.001, epochs=10, batch_size=64):
+    def train(self, train_set, learning_rate=0.01, epochs=20, batch_size=512):
         optimizer = optim.Adam(self.net.parameters(), lr=learning_rate)
 
         for epoch in range(epochs):
@@ -28,17 +33,15 @@ class NNWrapper(object):
             n_samples = len(train_set)
 
             for i in range(0, n_samples, batch_size):
-                sample_ids = np.random.randint(n_samples, batch_size)
+                sample_ids = np.random.randint(n_samples, size=batch_size)
                 boards, pis, vs = list(zip(*[train_set[i] for i in sample_ids]))
-                boards = torch.FloatTensor(np.array(boards).astype(np.float64))
-                pi_true = torch.FloatTensor(np.array(pis))
-                v_true = torch.FloatTensor(np.array(vs).astype(np.float64))
 
-                boards.cuda()
-                pi_true.cuda()
-                v_true.cuda()
+                boards = torch.FloatTensor(np.array(boards).astype(np.float64)).cuda()
+                pi_true = torch.FloatTensor(np.array(pis)).cuda()
+                v_true = torch.FloatTensor(np.array(vs).astype(np.float64)).cuda()
 
-                pi_pred, v_pred = self.net(boards)
+                state = boards.view(batch_size, 1, 3, 3)
+                pi_pred, v_pred = self.net(state)
 
                 loss, v_loss, pi_loss = self.compute_loss(pi_pred, pi_true, v_pred, v_true)
 
@@ -56,9 +59,11 @@ class NNWrapper(object):
         pi_loss = -(pi_true * pi_pred).mean()
         return v_loss + pi_loss, v_loss, pi_loss
 
+
     def save_model(self, filename='current'):
         save_path = './models/'
         torch.save(self.net, os.path.join(save_path, '{}.pt'.format(filename)))
 
     def load_model(self, filename='current'):
+        save_path = './models/'
         self.net = torch.load(os.path.join(save_path, '{}.pt'.format(filename)))

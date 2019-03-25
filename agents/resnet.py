@@ -36,7 +36,7 @@ class ResNet(nn.Module):
     def __init__(self, layers=[2, 2, 2], action_size=16):
         super(ResNet, self).__init__()
         block = ResidualBlock
-        self.in_channels = 1
+        self.in_channels = 128
         self.conv = conv3x3(1, 128)
         self.bn = nn.BatchNorm2d(128)
         self.layer1 = self.make_layer(block, 128, layers[0])
@@ -69,4 +69,4 @@ class ResNet(nn.Module):
 
         pi = self.pi(out)
         v = self.v(out)
-        return F.log_softmax(pi, dim=1), torch.tanh(v)
+        return F.softmax(pi, dim=1), torch.tanh(v)

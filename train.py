@@ -2,6 +2,7 @@ from arena import Arena
 from nn_wrapper import NNWrapper
 from agents.mcts import MCTS, Node
 from copy import deepcopy
+import numpy as np
 
 class Train(object):
 
@@ -10,7 +11,7 @@ class Train(object):
         self.net = net
         self.old_net = NNWrapper(game)  # random
 
-    def train(self, n_iterations=10, n_games=10, n_eval_games=50, threshold=0.6):
+    def train(self, n_iterations=30, n_games=50, n_eval_games=15, threshold=0.55):
         for i in range(n_iterations):
             print('Iteration', i)
 
@@ -18,18 +19,18 @@ class Train(object):
 
             for j in range(n_games):
                 print('Game', j)
-                game = self.game.clone()
-                self.play_out(game, train_set)
+                game_clone = self.game.clone()
+                self.play_out(game_clone, train_set)
 
             self.net.save_model()
             self.old_net.load_model()
 
-            self.net.train(train_set, learning_rate=0.001, epochs=10)
+            self.net.train(train_set)
 
             new_mcts = MCTS(self.net)
             old_mcts = MCTS(self.old_net)
 
-            arena = Arena(game, old_mcts, new_mcts)
+            arena = Arena(self.game, old_mcts, new_mcts)
 
             win_rate = arena.fight(n_eval_games)
             print('Win rate:', win_rate)
@@ -51,14 +52,13 @@ class Train(object):
         root = Node()
 
         while not is_done:
-            best_child = mcts.search(game, root, temperature=0.0001) # very little exploration
+            best_child = mcts.search(game, root, temperature=1)
 
             temp_train_set.append([game.get_canonical_board(),  # can a variable passed by reference be changed while in a list
                                   deepcopy(best_child.parent.child_psas), 0])
 
             action = best_child.action
             _, _, is_done = game.step(action)
-
 
             # best_child is now a root
             best_child.parent = None

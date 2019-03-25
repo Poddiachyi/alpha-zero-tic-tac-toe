@@ -103,7 +103,3 @@ class Game(object):
             print(z * spaces , x * (self.board_size * 4))
             row_number += 1
         print()
-
-
-    def get_symmetries(self):
-        pass
