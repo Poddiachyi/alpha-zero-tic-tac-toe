@@ -10,6 +10,6 @@
 - [X] Add Arena for models
 - [X] Add Train - class for training models
 - [X] Finish AlphaZero
-- [ ] Fix bugs
+- [x] Fix bugs
 - [ ] Refactor
 - [ ] Enhance README
